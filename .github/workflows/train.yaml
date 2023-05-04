@@ -14,7 +14,7 @@ jobs:
       - name: Create comment
         uses: peter-evans/create-or-update-comment@ca08ebd5dc95aa0cd97021e9708fcd6b87138c9b # v3.0.1
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: 1
           body: |
             # Thank you for creating a pull request!
             Please check out the information below if you have not made a pull request here before (or if you need a reminder how things work).
