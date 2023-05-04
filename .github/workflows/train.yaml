@@ -2,6 +2,7 @@ name: DVC Tracking with Github Actions
 on: [push]
 jobs:
   run:
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
