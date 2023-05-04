@@ -1,0 +1,6 @@
+wget
+scikit-learn
+pandas
+seaborn
+matplotlib
+dvc
