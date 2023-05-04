@@ -16,7 +16,7 @@ stages:
     cmd: python train.py
     deps:
     - train.py
-    - process_data.py
+    - data_processed.csv
     outs:
     - by_region.png
     metrics:
