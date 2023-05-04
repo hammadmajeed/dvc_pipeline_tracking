@@ -14,4 +14,5 @@ jobs:
           dvc repro
           git fetch --prune
           dvc metrics diff --show-md master >> report.md
+          echo "![](./by_region.png)" >> report.md
           gh pr comment ${{github.event.pull_request.number}} -F report.md
