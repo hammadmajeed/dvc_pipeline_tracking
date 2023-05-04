@@ -19,8 +19,7 @@ stages:
     - data_processed.csv
     outs:
     - by_region.png
-    - metrics.json
     metrics:
     - metrics.json:
         cache: false
-        
+
