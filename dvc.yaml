@@ -20,3 +20,7 @@ stages:
     outs:
     - by_region.png
     - metrics.json
+    metrics:
+    - metrics.json:
+        cache: false
+        
