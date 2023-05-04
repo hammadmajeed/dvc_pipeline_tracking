@@ -1,0 +1,13 @@
+name: DVC Tracking with Github Actions
+on: [push]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Running_updates
+        run: |
+          make install 
+          dvc repro
+          git fetch --prune
+          dvc metric diff --show-md
