@@ -12,7 +12,20 @@ jobs:
           git fetch --prune
           dvc metrics diff --show-md master >> report.md
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@ca08ebd5dc95aa0cd97021e9708fcd6b87138c9b # v3.0.1
         with:
-          body-path: 'report.md'
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            # Thank you for creating a pull request!
+            Please check out the information below if you have not made a pull request here before (or if you need a reminder how things work).
+
+            ## Code Quality and Contributing Guidelines
+            If you have not done so already, please familiarise yourself with our [Contributing Guidelines](https://github.com/adoptium/ci-jenkins-pipelines/blob/master/CONTRIBUTING.md) and [Code Of Conduct](https://github.com/adoptium/ci-jenkins-pipelines/blob/master/CODE_OF_CONDUCT.md), even if you have contributed before.
+
+            ## Tests
+            Github actions will run a set of jobs against your PR that will lint and unit test your changes. Keep an eye out for the results from these on the latest commit you submitted. For more information, please see our [testing documentation](https://github.com/adoptium/ci-jenkins-pipelines/blob/master/pipelines/build/prTester/README.md).
+
+            In order to run the advanced [pipeline tests](https://github.com/adoptium/ci-jenkins-pipelines/tree/master/pipelines/build/prTester#openjdk-build-pr-tester) (executing a set of mock pipelines), it requires an admin to post `run tests` on this PR.
+            If you are not an admin, please ask for one's attention in [#infrastructure on Slack](https://adoptium.slack.com/archives/C53GHCXL4) or ping one here.
+            To run full set of tests, use "run tests"; a subset of tests on specific jdk version, use "run tests quick 11,20" 
           
