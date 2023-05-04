@@ -10,4 +10,4 @@ jobs:
           make install 
           dvc repro
           git fetch --prune
-          dvc metric diff --show-md
+          dvc metrics diff --show-md
