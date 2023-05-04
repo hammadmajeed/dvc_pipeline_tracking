@@ -1,2 +1,2 @@
 # dvc_pipeline_tracking
-[](by_region.png)
+![](by_region.png)
