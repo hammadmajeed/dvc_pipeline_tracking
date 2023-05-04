@@ -11,3 +11,4 @@ jobs:
           dvc repro
           git fetch --prune
           dvc metrics diff --show-md master
+          gh pr comment 13 --body "Hi from GitHub CLI"
