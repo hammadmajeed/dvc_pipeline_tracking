@@ -3,8 +3,8 @@ on: [push]
 jobs:
   run:
     runs-on: ubuntu-latest
-    container: docker://dvcorg/cml-py3:latest
     steps:
+      - uses: iterative/setup-cml@v1
       - uses: actions/checkout@v2
       - name: Running_updates
         env: 
@@ -18,6 +18,6 @@ jobs:
           git config --global --add safe.directory /__w/dvc_pipeline_tracking/dvc_pipeline_tracking
           # Add figure to the report
           echo "## Validating results by region"
-          cml-publish by_region.png --md >> report.md
-          cml-send-comment report.md
+          echo '![](./by_region.png "Region wise plot")' >> report.md
+          cml comment create report.md
           
