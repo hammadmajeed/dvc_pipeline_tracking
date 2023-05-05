@@ -3,7 +3,7 @@ on: [push]
 jobs:
   run:
     runs-on: ubuntu-latest
-    container: docker://dvcorg/cml-py3:latest
+    container: docker://ghcr.io/iterative/cml:0-dvc2-base1
     steps:
       - uses: actions/checkout@v2
       - name: Running_updates
@@ -17,6 +17,6 @@ jobs:
           dvc metrics diff --show-md master > report.md
           # Add figure to the report
           echo "## Validating results by region"
-          cml-publish by_region.png --md >> report.md
-          cml-send-comment report.md
+          echo '![](./by_region.png "Region wise plot")' >> report.md
+          cml comment create report.md
           
