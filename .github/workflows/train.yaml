@@ -9,7 +9,7 @@ jobs:
       - name: Running_updates
         env: 
           GH_TOKEN: ${{ github.token }}
-          repo_token: ${{ secrets.REPO_TOKEN }}
+          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
         run: |
           make install 
           dvc repro
