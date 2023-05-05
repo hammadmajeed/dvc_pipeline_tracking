@@ -1,6 +1,6 @@
 import pandas as pd 
 import numpy as np
-from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
 from sklearn import preprocessing
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import confusion_matrix
@@ -27,8 +27,8 @@ imp.fit(X)
 X = imp.transform(X)
 
 
-# SVM model
-clf = SVC()
+# Linear  model
+clf = LogisticRegression()
 yhat = cross_val_predict(clf, X, y, cv=5)
 
 acc = np.mean(yhat==y)
