@@ -2,8 +2,8 @@ name: DVC Tracking with Github Actions
 on: [push]
 jobs:
   run:
+    permissions: write-all
     runs-on: ubuntu-latest
-    container: docker://ghcr.io/iterative/cml:0-dvc2-base1
     steps:
       - uses: actions/checkout@v2
       - name: Running_updates
@@ -15,8 +15,5 @@ jobs:
           dvc repro
           git fetch --prune
           dvc metrics diff --show-md master > report.md
-          # Add figure to the report
-          echo "## Validating results by region"
-          echo '![](./by_region.png "Region wise plot")' >> report.md
-          cml comment create report.md
+          gh pr comment ${{github.event.pull_request.number}} -F report.md
           
