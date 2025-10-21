@@ -35,7 +35,7 @@ jobs:
 
       - name: Generate DVC plots
         run: |
-          dvc plots diff --target accuracy.json -o plots/plot.png --show-vega off
+          dvc plots diff --target accuracy.json -o plots/plot.png
           git add plots
           git commit -m "Update DVC plots" || echo "No changes in plots"
 
