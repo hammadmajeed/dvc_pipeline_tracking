@@ -1,80 +1,18 @@
-name: DVC Tracking with GitHub Actions
-
-on:
-  push:
-permissions:
-  contents: write
-  pull-requests: write
-
+name: DVC Tracking with Github Actions
+on: [push]
 jobs:
-  dvc-tracking:
+  run:
+    permissions: write-all
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout repo with full credentials and history
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0               # Required for DVC to see full history
-          persist-credentials: true    # Keep credentials for git commands
-          token: ${{ secrets.REPO_TOKEN }}  # Use Personal Access Token
-
-      # Step 2: Set up environment and run DVC pipeline
-      - name: Run DVC pipeline
+      - uses: actions/checkout@v2
+      - name: Running_updates
         env: 
           GH_TOKEN: ${{ github.token }}
           REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
         run: |
-          echo "🔧 Installing dependencies..."
-          make install
-          
-          echo "🚀 Reproducing DVC pipeline..."
+          make install 
           dvc repro
-          
-          echo "📊 Generating metrics diff..."
+          git fetch --prune
           dvc metrics diff --md master > report.md
-
-      # Step 3: Commit changes (if any)
-      - name: Commit DVC changes
-        id: commit
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add .
-          if git diff --cached --quiet; then
-            echo "no_changes=true" >> $GITHUB_ENV
-            echo "✅ No new changes detected."
-          else
-            echo "no_changes=false" >> $GITHUB_ENV
-            git commit -m "Auto update DVC metrics $(date)"
-            echo "📦 Changes committed for PR creation."
-          fi
-
-      # Step 4 (optional): Comment on existing PR if this workflow runs on a PR
-      - name: Comment DVC metrics on existing PR
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "💬 Commenting metrics diff on existing PR..."
-          gh pr comment ${{ github.event.pull_request.number }} -F report.md
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      # Step 5: Create a PR if changes exist
-      - name: Create Pull Request
-        if: env.no_changes == 'false'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.REPO_TOKEN }}  # <-- Personal Access Token with repo scope
-          branch: auto-update-${{ github.run_number }}
-          title: "Automated DVC Update - Run #${{ github.run_number }}"
-          body: |
-            This pull request was automatically created by a GitHub Action.
-            It contains updates from the latest DVC pipeline run.
-            See the metrics report below:
-
-            ```markdown
-            $(cat report.md)
-            ```
-          base: master
-
+          gh pr comment ${{github.event.pull_request.number}} -F report.md
