@@ -1,56 +1,78 @@
 name: DVC Tracking with GitHub Actions
 
-on: [push]
-
-permissions:
-  contents: write        # 👈 allows creating branches, commits, and pushing
-  pull-requests: write   # 👈 allows opening/updating PRs
+on:
+  push:
+    branches:
+      - master
+      - main
 
 jobs:
-  dvc-metrics:
+  run:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for DVC to compare revisions
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          make install
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install dvc[all] seaborn scikit-learn matplotlib pandas numpy
 
       - name: Run DVC pipeline
         run: |
           dvc repro
 
-      - name: Generate metrics diff (Markdown)
+      - name: Show DVC metrics
         id: metrics
         run: |
-          git fetch --prune
-          echo "### DVC Metrics Diff" > metrics.md
-          dvc metrics diff --md master >> metrics.md
-          echo "" >> metrics.md
+          echo "### DVC Metrics Diff" >> metrics.md
+          dvc metrics diff --show-md >> metrics.md || echo "No metrics diff available" >> metrics.md
+          cat metrics.md
 
-      - name: Generate DVC plots
+      - name: Generate DVC plot
         run: |
-          dvc plots diff --target accuracy.json -o plots/plot.png
-          git add plots
-          git commit -m "Update DVC plots" || echo "No changes in plots"
+          mkdir -p plots
+          dvc plots diff --target accuracy.json -o plots/accuracy.png || echo "Plot generation failed"
+
+      - name: Commit and push results
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -B dvc-auto-update
+          git add metrics.json accuracy.json plots/accuracy.png dvc.lock || true
+          git commit -m "Auto-update DVC metrics and plots [skip ci]" || echo "No changes to commit"
+
+          git push --force origin dvc-auto-update
 
       - name: Create or update Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}    # uses repo's auto-token
-          title: "DVC: Metrics and Plots Update"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: dvc-auto-update
+          title: "📈 Auto-update DVC Metrics and Plots"
           body: |
-            ## 📊 DVC Metrics Diff
+            ## DVC Pipeline Results
+            The following metrics and plots were automatically generated:
+
             $(cat metrics.md)
 
-            ## 🖼️ DVC Plot Preview
-            ![DVC Plot](plots/plot.png)
+            ![Accuracy Plot](plots/accuracy.png)
 
-          commit-message: "Auto-update DVC metrics and plots"
-          branch: dvc-auto-update
-          base: master
+      - name: Post metrics comment
+        if: success()
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ steps.create_pull_request.outputs.pull-request-number }}
+          body-file: metrics.md
