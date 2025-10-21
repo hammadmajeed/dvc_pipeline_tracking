@@ -2,6 +2,10 @@ name: DVC Tracking with GitHub Actions
 
 on: [push]
 
+permissions:
+  contents: write        # 👈 allows creating branches, commits, and pushing
+  pull-requests: write   # 👈 allows opening/updating PRs
+
 jobs:
   dvc-metrics:
     runs-on: ubuntu-latest
@@ -31,22 +35,21 @@ jobs:
 
       - name: Generate DVC plots
         run: |
-          dvc plots diff --target accuracy.json -o plots
+          dvc plots diff --target accuracy.json -o plots/plot.png --show-vega off
           git add plots
           git commit -m "Update DVC plots" || echo "No changes in plots"
 
       - name: Create or update Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}    # uses repo's auto-token
           title: "DVC: Metrics and Plots Update"
           body: |
             ## 📊 DVC Metrics Diff
             $(cat metrics.md)
 
             ## 🖼️ DVC Plot Preview
-            Below is the updated DVC plot (if available):
-
-            ![DVC Plot](plots/index.html)
+            ![DVC Plot](plots/plot.png)
 
           commit-message: "Auto-update DVC metrics and plots"
           branch: dvc-auto-update
