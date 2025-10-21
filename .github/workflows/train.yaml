@@ -47,7 +47,7 @@ jobs:
         if: env.no_changes == 'false'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_TOKEN }}  # <-- Personal Access Token with repo scope
           branch: auto-update-${{ github.run_number }}
           title: "Automated DVC Update - Run #${{ github.run_number }}"
           body: |
@@ -59,4 +59,3 @@ jobs:
             $(cat report.md)
             ```
           base: master
-
