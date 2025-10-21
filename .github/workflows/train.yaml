@@ -1,13 +1,53 @@
-name: DVC Tracking with Github Actions
+name: DVC Tracking with GitHub Actions
+
 on: [push]
+
 jobs:
-  run:
+  dvc-metrics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Running_updates
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
         run: |
-          make install 
+          make install
+
+      - name: Run DVC pipeline
+        run: |
           dvc repro
+
+      - name: Generate metrics diff (Markdown)
+        id: metrics
+        run: |
           git fetch --prune
-          dvc metrics diff --show-md master
+          echo "### DVC Metrics Diff" > metrics.md
+          dvc metrics diff --md master >> metrics.md
+          echo "" >> metrics.md
+
+      - name: Generate DVC plots
+        run: |
+          dvc plots diff --target accuracy.json -o plots
+          git add plots
+          git commit -m "Update DVC plots" || echo "No changes in plots"
+
+      - name: Create or update Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "DVC: Metrics and Plots Update"
+          body: |
+            ## 📊 DVC Metrics Diff
+            $(cat metrics.md)
+
+            ## 🖼️ DVC Plot Preview
+            Below is the updated DVC plot (if available):
+
+            ![DVC Plot](plots/index.html)
+
+          commit-message: "Auto-update DVC metrics and plots"
+          branch: dvc-auto-update
+          base: master
