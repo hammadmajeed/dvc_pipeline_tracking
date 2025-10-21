@@ -1,29 +1,65 @@
-name: DVC Tracking with Github Actions
-on: [push]
+name: DVC Tracking with GitHub Actions
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   run:
-    permissions: write-all
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Running_updates
+      # Step 1: Checkout repository
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ensures full git history for DVC comparisons
+
+      # Step 2: Set up environment and run DVC pipeline
+      - name: Run DVC updates
         env: 
           GH_TOKEN: ${{ github.token }}
           REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
         run: |
-          make install 
+          make install
           dvc repro
           git fetch --prune
           dvc metrics diff --md master > report.md
-          gh pr comment ${{github.event.pull_request.number}} -F report.md
+
+      # Step 3: Commit changes if any
+      - name: Commit changes
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          if git diff --cached --quiet; then
+            echo "no_changes=true" >> $GITHUB_ENV
+          else
+            echo "no_changes=false" >> $GITHUB_ENV
+            git commit -m "Auto update DVC metrics $(date)"
+          fi
+
+      # Step 4: Create Pull Request only if there are changes
       - name: Create Pull Request
+        if: env.no_changes == 'false'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.branch_name }}
-          title: "Automated Update"
+          branch: auto-update-${{ github.run_number }}
+          title: "Automated DVC Update - Run #${{ github.run_number }}"
           body: |
             This pull request was automatically created by a GitHub Action.
-          base: main
+            It contains updates from the latest DVC pipeline run.
+            See the metrics report below:
 
-          
+            ```markdown
+            $(cat report.md)
+            ```
+          base: main
