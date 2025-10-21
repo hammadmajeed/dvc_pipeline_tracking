@@ -14,6 +14,6 @@ jobs:
           make install 
           dvc repro
           git fetch --prune
-          dvc metrics diff --show-md master > report.md
+          dvc metrics diff --md master > report.md
           gh pr comment ${{github.event.pull_request.number}} -F report.md
           
