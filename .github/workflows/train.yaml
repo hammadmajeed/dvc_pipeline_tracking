@@ -65,16 +65,16 @@ jobs:
         if: env.no_changes == 'false'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.REPO_TOKEN }}  # Personal Access Token with repo scope
+          token: ${{ secrets.REPO_TOKEN }}  # <-- Personal Access Token with repo scope
           branch: auto-update-${{ github.run_number }}
           title: "Automated DVC Update - Run #${{ github.run_number }}"
           body: |
-            🧠 **Automated DVC Pipeline Update**
-            This pull request was automatically created by GitHub Actions.
+            This pull request was automatically created by a GitHub Action.
             It contains updates from the latest DVC pipeline run.
+            See the metrics report below:
 
-            ### 📈 Metrics Diff
             ```markdown
             $(cat report.md)
             ```
           base: master
+
