@@ -58,5 +58,5 @@ jobs:
             ```markdown
             $(cat report.md)
             ```
-          base: main
+          base: master
 
