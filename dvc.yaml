@@ -6,13 +6,15 @@ stages:
     - process_data.py
     outs:
     - data_processed.csv
- train:
+train:
     cmd: python train.py
     deps:
-    - train.py
-    - data_processed.csv
-    outs:
-    - by_region.png
+      - train.py
+      - data_processed.csv
     metrics:
-    - metrics.json:
-        cache: false
+      - metrics.json:
+          cache: false
+    plots:
+      - accuracy.json:
+          cache: false
+
