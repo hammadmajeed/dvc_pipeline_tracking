@@ -16,5 +16,14 @@ jobs:
           git fetch --prune
           dvc metrics diff --md master > report.md
           gh pr comment ${{github.event.pull_request.number}} -F report.md
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.branch_name }}
+          title: "Automated Update"
+          body: |
+            This pull request was automatically created by a GitHub Action.
+          base: main
 
           
