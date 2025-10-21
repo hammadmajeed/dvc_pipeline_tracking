@@ -1,18 +1,12 @@
 stages:
-  get_data:
-    cmd: python get_data.py
-    deps:
-    - get_data.py
-    outs:
-    - data_raw.csv
-  process_data:
+ process_data:
     cmd: python process_data.py
     deps:
     - data_raw.csv
     - process_data.py
     outs:
     - data_processed.csv
-  train:
+ train:
     cmd: python train.py
     deps:
     - train.py
